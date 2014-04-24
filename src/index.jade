@@ -1,0 +1,105 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+    title When virtualenv is not enough
+
+    // build:css styles/styles.css
+    //- Check out 'src/bower_components/prism/themes/' for available themes
+    link(rel='stylesheet', type='text/css', href='bower_components/prism/themes/prism-tomorrow.css')
+    link(rel='stylesheet', type='text/css', href='styles/main.css')
+    // endbuild
+
+  body
+
+    article
+
+      section.title
+        h1 When <code>virtualenv</code><br>is not enough
+
+      section
+        h2 Hi, I'm Steve
+        ul
+          li Web Engineer @ Insync
+          li Pythonista since 2010
+          li twitter.com/themarksteve
+          li github.com/marksteve
+
+      section
+        p
+          img(src='images/docker.png', width=480)
+
+      section
+        p
+          img(src='images/docker.png', width=120)
+        p.
+          Docker is an open-source engine that automates the deployment of any
+          application as a lightweight, portable, self-sufficient container that
+          will run virtually anywhere.
+
+      section.versus
+        .title.three.cols.bullet
+          .col
+            h2 System Virtual Machines
+            ul
+              li Emulates hardware and OS
+              li Resource heavy
+          .col
+            img(src='images/vs.jpg', width=80)
+          .col
+            h2 Docker Containers
+            ul
+              li Isolates your app but shares the same resource and OS with the host
+              li Lightweight
+              li Portable
+
+      section
+        h2 Docker Components
+        h3.bullet Daemon, Client and the Index
+        h4.bullet Daemon (<code>docker -d</code>)
+        p.bullet Receives and process commands<br>through sockets or a RESTful API
+        h4.bullet Client (<code>docker &lt;command&gt;</code>)
+        p.bullet Primary user interface to Docker
+        h4.bullet Index (<code>http://index.docker.io/</code>)
+        p.bullet Global archive and directory for<br>user supplied Docker images
+
+      section
+        h2 Docker Elements
+        h3.bullet Containers, Images and the Dockerfile
+        h4.bullet Containers (<code>docker ps</code>)
+        p.bullet Isolated environments that runs your apps
+        h4.bullet Images (<code>docker images</code>)
+        p.bullet Templates containers are built from
+        h4.bullet Dockerfile
+        p.bullet Blueprint for building images
+
+      section
+        h2 Hello World
+        pre
+          code.language-bash.
+            $ docker pull ubuntu
+            $ docker run ubuntu echo "Hello, world"
+            Hello, world
+
+      section
+        h2 Hello World
+        pre
+          code.language-bash.
+            $ docker ps -a
+            CONTAINER ID  IMAGE         COMMAND            ...
+            aa3264ba7371  ubuntu:12.04  echo Hello, world  ...
+
+    // build:js scripts/scripts.js
+    script(src='bower_components/bespoke.js/dist/bespoke.min.js')
+    script(src='bower_components/bespoke-keys/dist/bespoke-keys.min.js')
+    script(src='bower_components/bespoke-touch/dist/bespoke-touch.min.js')
+    script(src='bower_components/bespoke-bullets/dist/bespoke-bullets.min.js')
+    script(src='bower_components/bespoke-scale/dist/bespoke-scale.min.js')
+    script(src='bower_components/bespoke-hash/dist/bespoke-hash.min.js')
+    script(src='bower_components/bespoke-progress/dist/bespoke-progress.min.js')
+    script(src='bower_components/bespoke-state/dist/bespoke-state.min.js')
+    script(src='bower_components/prism/prism.js')
+    script(src='bower_components/prism/components/prism-bash.js')
+    script(src='scripts/main.js')
+    // endbuild
