@@ -63,9 +63,9 @@ html
         h2 Docker Components
         h3.bullet Daemon, Client and the Index
         h4.bullet Daemon (<code>docker -d</code>)
-        p.bullet Receives and process commands<br>through sockets or a RESTful API
+        p.bullet Receives and processes commands<br>to manage lifecycle of containers
         h4.bullet Client (<code>docker &lt;command&gt;</code>)
-        p.bullet Primary user interface to Docker
+        p.bullet Primary user interface to Docker sending<br>commands through sockets or the RESTful API
         h4.bullet Index (<code>http://index.docker.io/</code>)
         p.bullet Global archive and directory for<br>user supplied Docker images
 
@@ -84,7 +84,7 @@ html
         pre
           code.language-bash.
             $ docker pull ubuntu
-            $ docker run --rm ubuntu echo "Hello, world"
+            $ docker run ubuntu echo "Hello, world"
             Hello, world
 
       section
