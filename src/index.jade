@@ -96,7 +96,7 @@ html
             aa3264ba7371  ubuntu:12.04  echo Hello, world  ...
 
       section
-        h2 Dockerfile
+        h2 Building Images
         pre
           code.language-bash.
             $ cat &gt;Dockerfile &lt;&lt;EOF
@@ -115,6 +115,14 @@ html
             &gt;&gt;&gt; import requests
 
       section
+        h2 Build Images
+        pre
+          code.language-bash.
+            $ docker images
+            REPOSITORY       TAG     IMAGE ID      ...
+            python-requests  latest  1a1709cd171b  ...
+
+      section
         h2 Exposing Ports
         pre
           code.language-python.
@@ -128,8 +136,8 @@ html
             def index():
               return "Hello, world"
 
-            if __name__ == '__main__':
-              app.run()
+            if __name__ == "__main__":
+              app.run(host="0.0.0.0")
 
       section
         h2 Exposing Ports
@@ -138,12 +146,13 @@ html
             $ cat &gt;Dockerfile &lt;&lt;EOF
             FROM marksteve/python
             RUN pip install Flask
+            ADD app.py /src/app.py
             CMD python /src/app.py
             EOF
             $ docker build --rm -t flask-hello-world .
         pre.bullet
           code.language-bash.
-            $ docker run --rm -p 5000:5000 flask-hello-world
+            $ docker run --rm -t -i -p 5000:5000 flask-hello-world
 
       section
         h2 Volumes
