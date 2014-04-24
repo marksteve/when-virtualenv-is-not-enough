@@ -213,13 +213,24 @@ code
 
 // slide styles
 
-section.title
-  background: url(../images/title.jpg) no-repeat
+slide-bg(image)
+  background: image no-repeat center center
   background-size: cover
+
+section.title
+  slide-bg(url(../images/title.jpg))
   color: white
 
 section.versus
+  slide-bg(url(../images/versus.gif))
+  color: white
   .title
     align-items: flex-start
     h2
       font-size: 32px
+
+// bespoke plugins
+
+.bespoke-progress-bar
+  background: rgba(0, 0, 0, 0.5)
+  border-radius: 0

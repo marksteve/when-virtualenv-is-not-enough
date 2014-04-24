@@ -51,7 +51,7 @@ html
               li Emulates hardware and OS
               li Resource heavy
           .col
-            img(src='images/vs.jpg', width=80)
+            img(src='images/versus.png', width=80)
           .col
             h2 Docker Containers
             ul
@@ -84,7 +84,7 @@ html
         pre
           code.language-bash.
             $ docker pull ubuntu
-            $ docker run ubuntu echo "Hello, world"
+            $ docker run --rm ubuntu echo "Hello, world"
             Hello, world
 
       section
@@ -94,6 +94,112 @@ html
             $ docker ps -a
             CONTAINER ID  IMAGE         COMMAND            ...
             aa3264ba7371  ubuntu:12.04  echo Hello, world  ...
+
+      section
+        h2 Dockerfile
+        pre
+          code.language-bash.
+            $ cat &gt;Dockerfile &lt;&lt;EOF
+            FROM marksteve/python
+            RUN pip install requests
+            EOF
+            $ docker build --rm -t python-requests .
+            ...
+            $ docker run --rm -t -i python-requests /bin/bash -il
+            # Inside docker container
+            $ python
+            Python 2.7.6 (default, Mar 22 2014, 22:59:56)
+            [GCC 4.8.2] on linux2
+            Type "help", "copyright", "credits" or "license" for more
+            information.
+            &gt;&gt;&gt; import requests
+
+      section
+        h2 Exposing Ports
+        pre
+          code.language-python.
+            # app.py
+
+            from flask import Flask
+
+            app = Flask(__name__)
+
+            @app.route("/")
+            def index():
+              return "Hello, world"
+
+            if __name__ == '__main__':
+              app.run()
+
+      section
+        h2 Exposing Ports
+        pre.bullet
+          code.language-bash.
+            $ cat &gt;Dockerfile &lt;&lt;EOF
+            FROM marksteve/python
+            RUN pip install Flask
+            CMD python /src/app.py
+            EOF
+            $ docker build --rm -t flask-hello-world .
+        pre.bullet
+          code.language-bash.
+            $ docker run --rm -p 5000:5000 flask-hello-world
+
+      section
+        h2 Volumes
+        pre
+          code.language-python.
+            # update-settings.py
+
+            import json
+            import sys
+
+            SETTINGS_FILE = "/var/app/settings.json"
+
+            if __name__ == '__main__':
+              try:
+                with open(SETTINGS_FILE) as f:
+                  settings = json.load(f)
+              except:
+                settings = dict()
+              settings[sys.argv[1]] = sys.argv[2]
+              with open(SETTINGS_FILE, "w") as f:
+                f.write(json.dumps(settings))
+
+      section
+        h2 Volumes
+        pre
+          code.language-bash.
+            $ docker run --rm -v /var/app --name app-settings \
+            ubuntu true
+
+            $ cat &gt;Dockerfile &lt;&lt;EOF
+            FROM marksteve/python
+            ADD update-settings.py /src/update-settings.py
+            WORKDIR /src
+            ENTRYPOINT ["python", "update-settings.py"]
+            EOF
+
+            $ docker build --rm -t update-settings .
+
+      section
+        h2 Volumes
+        pre
+          code.language-bash.
+            $ docker run --rm --volumes-from app-settings \
+            update-settings cheats on
+
+            $ docker run --rm --volumes-from app-settings \
+            update-settings gold 16000
+
+            $ docker run --rm --volumes-from app-settings ubuntu \
+            cat /var/app/settings.json
+
+      section
+        h2 Host Mounts
+        pre
+          code.language-bash.
+            $ docker run --rm -v `pwd`:/host ubuntu ls /host
 
     // build:js scripts/scripts.js
     script(src='bower_components/bespoke.js/dist/bespoke.min.js')
@@ -106,5 +212,6 @@ html
     script(src='bower_components/bespoke-state/dist/bespoke-state.min.js')
     script(src='bower_components/prism/prism.js')
     script(src='bower_components/prism/components/prism-bash.js')
+    script(src='bower_components/prism/components/prism-python.js')
     script(src='scripts/main.js')
     // endbuild
