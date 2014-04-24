@@ -21,10 +21,12 @@ html
       section
         h2 Hi, I'm Steve
         ul
-          li Web Engineer @ Insync
+          li
+            | Web Engineer @&nbsp;
+            a(href='https://www.insynchq.com') Insync
           li Pythonista since 2010
-          li twitter.com/themarksteve
-          li github.com/marksteve
+          li: a(href='https://twitter.com/themarksteve') twitter.com/themarksteve
+          li: a(href='https://github.com/marksteve') github.com/marksteve
 
       section
         p
@@ -33,10 +35,13 @@ html
       section
         p
           img(src='images/docker.png', width=120)
-        p.
+        blockquote.
           Docker is an open-source engine that automates the deployment of any
           application as a lightweight, portable, self-sufficient container that
           will run virtually anywhere.
+        p
+          | &mdash;&nbsp;
+          a(href='https://www.docker.io') docker.io
 
       section.versus
         .title.three.cols.bullet
