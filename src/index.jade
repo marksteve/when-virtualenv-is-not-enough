@@ -49,7 +49,8 @@ html
             h2 System Virtual Machines
             ul
               li Emulates hardware and OS
-              li Resource heavy
+              li Eats lot of storage space
+              li Heavy on resources
           .col
             img(src='images/versus.png', width=80)
           .col
@@ -58,8 +59,10 @@ html
               li Isolates your app but shares the same resource and OS with the host
               li Lightweight
               li Portable
+              li Works inside System Virtual Machines
+              li Social!
 
-      section
+      section.components
         h2 Docker Components
         h3.bullet Daemon, Client and the Index
         h4.bullet Daemon (<code>docker -d</code>)
@@ -69,7 +72,7 @@ html
         h4.bullet Index (<code>http://index.docker.io/</code>)
         p.bullet Global archive and directory for<br>user supplied Docker images
 
-      section
+      section.elements
         h2 Docker Elements
         h3.bullet Containers, Images and the Dockerfile
         h4.bullet Containers (<code>docker ps</code>)
@@ -209,6 +212,136 @@ html
         pre
           code.language-bash.
             $ docker run --rm -v `pwd`:/host ubuntu ls /host
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-python.
+            # app.py
+
+            from flask import Flask, jsonify, request
+            from flask_redisconfig import RedisConfig
+
+            app = Flask(__name__)
+            config = RedisConfig("app:config")
+            config.init_app(app)
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-python.
+            # app.py
+
+            @app.route("/config/&lt;name&gt;")
+            def get_config(name):
+              res = dict()
+              res[name] = app.config.get(name)
+              return jsonify(**res)
+
+            if __name__ == "__main__":
+              app.run(host="0.0.0.0")
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-bash.
+            $ cat &gt;Dockerfile &lt;&lt;EOF
+            FROM marksteve/python
+            RUN pip install Flask Flask-RedisConfig
+            ADD app.py /src/app.py
+            EOF
+            $ docker build --rm -t flask-with-redisconfig .
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-bash.
+            $ docker run -d --name app-redis marksteve/redis
+            $ docker run --rm -t -i -p 5000:5000 \
+            --link app-redis:redis flask-with-redisconfig \
+            env
+            ...
+            REDIS_PORT=tcp://172.17.0.9:6379
+            REDIS_PORT_6379_TCP=tcp://172.17.0.9:6379
+            REDIS_PORT_6379_TCP_ADDR=172.17.0.9
+            REDIS_PORT_6379_TCP_PORT=6379
+            REDIS_PORT_6379_TCP_PROTO=tcp
+            REDIS_NAME=/cocky_nobel/redis
+            ...
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-python.
+            import os
+            host = os.environ.get("REDIS_PORT_6379_TCP_ADDR")
+            config = RedisConfig("app.config", host=host)
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-bash.
+            $ echo "CMD python /src/app.py" &gt;&gt; Dockerfile
+            $ docker build --rm -t flask-with-redisconfig .
+            $ docker run --rm -t -i --link app-redis:redis \
+            flask-with-redisconfig /bin/bash -il
+            # Inside docker container
+            $ cd src
+            $ python
+            &gt;&gt;&gt; from app import config
+            &gt;&gt;&gt; config.cli()
+            Flask-RedisConfig
+            &gt; set_bool DEBUG 1
+            &gt; set SECRET_KEY theresnoplacelikecowlevel
+
+      section
+        h2 Linking Containers
+        pre
+          code.language-bash.
+            $ docker run --rm -t -i -p 5000:5000 \
+            --link app-redis:redis flask-with-redisconfig
+
+      section.tools
+        h2 Tools
+        .three.cols.bullet
+          .col
+            h3 Orchestration
+            ul
+              li: a(href='http://orchardup.github.io/fig/') Fig
+              li: a(href='https://github.com/toscanini/maestro') Maestro
+              li: a(href='https://github.com/mailgun/shipper') Shipper
+          .col
+            h3 Web Interface
+            ul
+              li: a(href='https://github.com/shipyard/shipyard') Shipyard
+              li: a(href='https://github.com/crosbymichael/dockerui') DockerUI
+          .col
+            h3 Service
+            ul
+              li: a(href='https://github.com/progrium/dokku') Dokku (PaaS)
+              li: a(href='https://github.com/deis/deis') Deis (PaaS)
+              li: a(href='https://github.com/drone/drone') Drone (CI)
+
+      section
+        h2.bullet I use Docker to&hellip;
+        ul
+          li Create dev environments
+          li Try out libraries with complicated build instructions
+          li Run apps in my personal server
+          li Package my personal projects
+
+      section
+        h2 So have I convinced<br>you to use Docker?
+        h3 Thank you for listening
+        p.
+          I should be looking awkward right<br>
+          now, waiting for your questions
+        br
+        p.ps
+          small.
+            P.S. I don't own any of the images used in this<br>
+            presentation except for the title slide background
+
 
     // build:js scripts/scripts.js
     script(src='bower_components/bespoke.js/dist/bespoke.min.js')
