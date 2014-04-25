@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>When virtualenv is not enough</title>
+    <link rel="stylesheet" href="styles/styles.css"/>
+  </head>
+  <body>
+    <article>
+      <section class="title">
+        <h1>When <code>virtualenv</code><br>is not enough</h1>
+      </section>
+      <section>
+        <h2>Hi, I'm Steve</h2>
+        <ul>
+          <li>Web Engineer @&nbsp;<a href="https://www.insynchq.com">Insync</a></li>
+          <li>Pythonista since 2010</li>
+          <li><a href="https://twitter.com/themarksteve">twitter.com/themarksteve</a></li>
+          <li><a href="https://github.com/marksteve">github.com/marksteve</a></li>
+        </ul>
+      </section>
+      <section>
+        <p><img src="images/docker.png" width="480"></p>
+      </section>
+      <section>
+        <p><img src="images/docker.png" width="120"></p>
+        <blockquote>
+          Docker is an open-source engine that automates the deployment of any
+          application as a lightweight, portable, self-sufficient container that
+          will run virtually anywhere.
+        </blockquote>
+        <p>&mdash;&nbsp;<a href="https://www.docker.io">docker.io</a></p>
+      </section>
+      <section class="versus">
+        <div class="title three cols bullet">
+          <div class="col">
+            <h2>System Virtual Machines</h2>
+            <ul>
+              <li>Emulates hardware and OS</li>
+              <li>Eats lot of storage space</li>
+              <li>Heavy on resources</li>
+            </ul>
+          </div>
+          <div class="col"><img src="images/versus.png" width="80"></div>
+          <div class="col">
+            <h2>Docker Containers</h2>
+            <ul>
+              <li>Isolates your app but shares the same resource and OS with the host</li>
+              <li>Lightweight</li>
+              <li>Portable</li>
+              <li>Works inside System Virtual Machines</li>
+              <li>Social!</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section class="components">
+        <h2>Docker Components</h2>
+        <h3 class="bullet">Daemon, Client and the Index</h3>
+        <h4 class="bullet">Daemon (<code>docker -d</code>)</h4>
+        <p class="bullet">Receives and processes commands<br>to manage lifecycle of containers</p>
+        <h4 class="bullet">Client (<code>docker &lt;command&gt;</code>)</h4>
+        <p class="bullet">Primary user interface to Docker sending<br>commands through sockets or the RESTful API</p>
+        <h4 class="bullet">Index (<code>http://index.docker.io/</code>)</h4>
+        <p class="bullet">Global archive and directory for<br>user supplied Docker images</p>
+      </section>
+      <section class="elements">
+        <h2>Docker Elements</h2>
+        <h3 class="bullet">Containers, Images and the Dockerfile</h3>
+        <h4 class="bullet">Containers (<code>docker ps</code>)</h4>
+        <p class="bullet">Isolated environments that runs your apps</p>
+        <h4 class="bullet">Images (<code>docker images</code>)</h4>
+        <p class="bullet">Templates containers are built from</p>
+        <h4 class="bullet">Dockerfile</h4>
+        <p class="bullet">Blueprint for building images</p>
+      </section>
+      <section>
+        <h2>Hello World</h2>
+        <pre><code class="language-bash">$ docker pull ubuntu
+$ docker run ubuntu echo "Hello, world"
+Hello, world
+</code></pre>
+      </section>
+      <section>
+        <h2>Hello World</h2>
+        <pre><code class="language-bash">$ docker ps -a
+CONTAINER ID  IMAGE         COMMAND            ...
+aa3264ba7371  ubuntu:12.04  echo Hello, world  ...
+</code></pre>
+      </section>
+      <section>
+        <h2>Building Images</h2>
+        <pre><code class="language-bash">$ cat &gt;Dockerfile &lt;&lt;EOF
+FROM marksteve/python
+RUN pip install requests
+EOF
+$ docker build --rm -t python-requests .
+...
+$ docker run --rm -t -i python-requests /bin/bash -il
+# Inside docker container
+$ python
+Python 2.7.6 (default, Mar 22 2014, 22:59:56)
+[GCC 4.8.2] on linux2
+Type "help", "copyright", "credits" or "license" for more
+information.
+&gt;&gt;&gt; import requests
+</code></pre>
+      </section>
+      <section>
+        <h2>Build Images</h2>
+        <pre><code class="language-bash">$ docker images
+REPOSITORY       TAG     IMAGE ID      ...
+python-requests  latest  1a1709cd171b  ...
+</code></pre>
+      </section>
+      <section>
+        <h2>Exposing Ports</h2>
+        <pre><code class="language-python"># app.py
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+  return "Hello, world"
+  
+if __name__ == "__main__":
+  app.run(host="0.0.0.0")
+  </code></pre>
+      </section>
+      <section>
+        <h2>Exposing Ports</h2>
+        <pre class="bullet"><code class="language-bash">$ cat &gt;Dockerfile &lt;&lt;EOF
+FROM marksteve/python
+RUN pip install Flask
+ADD app.py /src/app.py
+CMD python /src/app.py
+EOF
+$ docker build --rm -t flask-hello-world .</code></pre>
+        <pre class="bullet"><code class="language-bash">$ docker run --rm -t -i -p 5000:5000 flask-hello-world
+</code></pre>
+      </section>
+      <section>
+        <h2>Volumes</h2>
+        <pre><code class="language-python"># update-settings.py
+
+import json
+import sys
+
+SETTINGS_FILE = "/var/app/settings.json"
+
+if __name__ == '__main__':
+  try:
+    with open(SETTINGS_FILE) as f:
+      settings = json.load(f)
+  except:
+    settings = dict()
+  settings[sys.argv[1]] = sys.argv[2]
+  with open(SETTINGS_FILE, "w") as f:
+    f.write(json.dumps(settings))
+    </code></pre>
+      </section>
+      <section>
+        <h2>Volumes</h2>
+        <pre><code class="language-bash">$ docker run --rm -v /var/app --name app-settings \
+ubuntu true
+
+$ cat &gt;Dockerfile &lt;&lt;EOF
+FROM marksteve/python
+ADD update-settings.py /src/update-settings.py
+WORKDIR /src
+ENTRYPOINT ["python", "update-settings.py"]
+EOF
+
+$ docker build --rm -t update-settings .
+</code></pre>
+      </section>
+      <section>
+        <h2>Volumes</h2>
+        <pre><code class="language-bash">$ docker run --rm --volumes-from app-settings \
+update-settings cheats on
+
+$ docker run --rm --volumes-from app-settings \
+update-settings gold 16000
+
+$ docker run --rm --volumes-from app-settings ubuntu \
+cat /var/app/settings.json
+</code></pre>
+      </section>
+      <section>
+        <h2>Host Mounts</h2>
+        <pre><code class="language-bash">$ docker run --rm -v `pwd`:/host ubuntu ls /host
+</code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-python"># app.py
+
+from flask import Flask, jsonify, request
+from flask_redisconfig import RedisConfig
+
+app = Flask(__name__)
+config = RedisConfig("app:config")
+config.init_app(app)
+</code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-python"># app.py
+
+@app.route("/config/&lt;name&gt;")
+def get_config(name):
+  res = dict()
+  res[name] = app.config.get(name)
+  return jsonify(**res)
+  
+if __name__ == "__main__":
+  app.run(host="0.0.0.0")
+  </code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-bash">$ cat &gt;Dockerfile &lt;&lt;EOF
+FROM marksteve/python
+RUN pip install Flask Flask-RedisConfig
+ADD app.py /src/app.py
+EOF
+$ docker build --rm -t flask-with-redisconfig .
+</code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-bash">$ docker run -d --name app-redis marksteve/redis
+$ docker run --rm -t -i -p 5000:5000 \
+--link app-redis:redis flask-with-redisconfig \
+env
+...
+REDIS_PORT=tcp://172.17.0.9:6379
+REDIS_PORT_6379_TCP=tcp://172.17.0.9:6379
+REDIS_PORT_6379_TCP_ADDR=172.17.0.9
+REDIS_PORT_6379_TCP_PORT=6379
+REDIS_PORT_6379_TCP_PROTO=tcp
+REDIS_NAME=/cocky_nobel/redis
+...
+</code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-python">import os
+host = os.environ.get("REDIS_PORT_6379_TCP_ADDR")
+config = RedisConfig("app.config", host=host)
+</code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-bash">$ echo "CMD python /src/app.py" &gt;&gt; Dockerfile
+$ docker build --rm -t flask-with-redisconfig .
+$ docker run --rm -t -i --link app-redis:redis \
+flask-with-redisconfig /bin/bash -il
+# Inside docker container
+$ cd src
+$ python
+&gt;&gt;&gt; from app import config
+&gt;&gt;&gt; config.cli()
+Flask-RedisConfig
+&gt; set_bool DEBUG 1
+&gt; set SECRET_KEY theresnoplacelikecowlevel
+</code></pre>
+      </section>
+      <section>
+        <h2>Linking Containers</h2>
+        <pre><code class="language-bash">$ docker run --rm -t -i -p 5000:5000 \
+--link app-redis:redis flask-with-redisconfig
+</code></pre>
+      </section>
+      <section class="tools">
+        <h2>Tools</h2>
+        <div class="three cols bullet">
+          <div class="col">
+            <h3>Orchestration</h3>
+            <ul>
+              <li><a href="http://orchardup.github.io/fig/">Fig</a></li>
+              <li><a href="https://github.com/toscanini/maestro">Maestro</a></li>
+              <li><a href="https://github.com/mailgun/shipper">Shipper</a></li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Web Interface</h3>
+            <ul>
+              <li><a href="https://github.com/shipyard/shipyard">Shipyard</a></li>
+              <li><a href="https://github.com/crosbymichael/dockerui">DockerUI</a></li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Service</h3>
+            <ul>
+              <li><a href="https://github.com/progrium/dokku">Dokku (PaaS)</a></li>
+              <li><a href="https://github.com/deis/deis">Deis (PaaS)</a></li>
+              <li><a href="https://github.com/drone/drone">Drone (CI)</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2 class="bullet">I use Docker to&hellip;</h2>
+        <ul>
+          <li>Create dev environments</li>
+          <li>Try out libraries with complicated build instructions</li>
+          <li>Run apps in my personal server</li>
+          <li>Package my personal projects</li>
+        </ul>
+      </section>
+      <section>
+        <h2>So have I convinced<br>you to use Docker?</h2>
+        <h3>Thank you for listening</h3>
+        <p>
+          I should be looking awkward right<br>
+          now, waiting for your questions
+        </p><br>
+        <p class="ps"><small>
+            P.S. I don't own any of the images used in this<br>
+            presentation except for the title slide background
+            
+            </small></p>
+      </section>
+    </article>
+    <script src="scripts/scripts.js"></script>
+  </body>
+</html>
