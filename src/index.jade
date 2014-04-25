@@ -168,7 +168,7 @@ html
 
             SETTINGS_FILE = "/var/app/settings.json"
 
-            if __name__ == '__main__':
+            if __name__ == "__main__":
               try:
                 with open(SETTINGS_FILE) as f:
                   settings = json.load(f)
@@ -182,7 +182,7 @@ html
         h2 Volumes
         pre
           code.language-bash.
-            $ docker run --rm -v /var/app --name app-settings \
+            $ docker run -v /var/app --name app-settings \
             ubuntu true
 
             $ cat &gt;Dockerfile &lt;&lt;EOF
@@ -249,6 +249,7 @@ html
             FROM marksteve/python
             RUN pip install Flask Flask-RedisConfig
             ADD app.py /src/app.py
+            CMD python /src/app.py
             EOF
             $ docker build --rm -t flask-with-redisconfig .
 
@@ -257,9 +258,8 @@ html
         pre
           code.language-bash.
             $ docker run -d --name app-redis marksteve/redis
-            $ docker run --rm -t -i -p 5000:5000 \
-            --link app-redis:redis flask-with-redisconfig \
-            env
+            $ docker run --rm -t -i --link app-redis:redis \
+            flask-with-redisconfig env
             ...
             REDIS_PORT=tcp://172.17.0.9:6379
             REDIS_PORT_6379_TCP=tcp://172.17.0.9:6379
@@ -281,7 +281,6 @@ html
         h2 Linking Containers
         pre
           code.language-bash.
-            $ echo "CMD python /src/app.py" &gt;&gt; Dockerfile
             $ docker build --rm -t flask-with-redisconfig .
             $ docker run --rm -t -i --link app-redis:redis \
             flask-with-redisconfig /bin/bash -il
